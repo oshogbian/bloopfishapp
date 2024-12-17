@@ -1,0 +1,239 @@
+:root {
+   --primary-color: #3498db;
+   --secondary-color: #2ecc71;
+   --text-color: #333;
+   --background-color: #f4f8f9;
+   --card-background: white;
+ }
+ 
+ * {
+   box-sizing: border-box;
+   margin: 0;
+   padding: 0;
+ }
+ 
+ .financial-tracker {
+   font-family: 'Arial', sans-serif;
+   background-color: var(--background-color);
+   min-height: 100vh;
+   padding: 20px;
+ }
+ 
+ .tracker-container {
+   max-width: 1200px;
+   margin: 0 auto;
+   background-color: white;
+   border-radius: 12px;
+   box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+   padding: 30px;
+ }
+ 
+ h1 {
+   text-align: center;
+   color: var(--primary-color);
+   margin-bottom: 30px;
+   font-size: 2.5em;
+ }
+ 
+ /* Mobile Summary Grid */
+ .mobile-summary-grid {
+   display: grid;
+   grid-template-columns: repeat(2, 1fr);
+   gap: 15px;
+   margin-bottom: 30px;
+ }
+ 
+ .mobile-summary-card {
+   background-color: var(--card-background);
+   border-radius: 10px;
+   padding: 20px;
+   text-align: center;
+   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+   transition: transform 0.3s ease;
+ }
+ 
+ .mobile-summary-card:hover {
+   transform: scale(1.05);
+ }
+ 
+ .mobile-summary-card h3 {
+   color: var(--primary-color);
+   margin-bottom: 10px;
+ }
+ 
+ .mobile-summary-card p {
+   font-size: 1.2em;
+   font-weight: bold;
+   color: var(--text-color);
+ }
+ 
+ /* Desktop Summary Grid */
+ .summary-grid {
+   display: grid;
+   grid-template-columns: repeat(5, 1fr);
+   gap: 15px;
+   margin-bottom: 30px;
+ }
+ 
+ .summary-item {
+   background-color: var(--card-background);
+   border-radius: 10px;
+   padding: 20px;
+   text-align: center;
+   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+   transition: transform 0.3s ease;
+ }
+ 
+ .summary-item:hover {
+   transform: scale(1.05);
+ }
+ 
+ .summary-item span {
+   color: var(--primary-color);
+   display: block;
+   margin-bottom: 10px;
+ }
+ 
+ .summary-item strong {
+   font-size: 1.2em;
+   color: var(--text-color);
+ }
+ 
+ /* Transaction Form */
+ .transaction-form {
+   display: grid;
+   grid-template-columns: repeat(5, 1fr);
+   gap: 15px;
+   margin-bottom: 30px;
+ }
+ 
+ .transaction-form input,
+ .transaction-form select,
+ .transaction-form button {
+   width: 100%;
+   padding: 12px;
+   border: 1px solid #ddd;
+   border-radius: 8px;
+   font-size: 1em;
+ }
+ 
+ .transaction-form button {
+   background-color: var(--primary-color);
+   color: white;
+   border: none;
+   cursor: pointer;
+   transition: background-color 0.3s ease;
+ }
+ 
+ .transaction-form button:hover {
+   background-color: #2980b9;
+ }
+ 
+ /* Mobile Transactions */
+ .mobile-transaction-list {
+   display: flex;
+   flex-direction: column;
+   gap: 15px;
+ }
+ 
+ .mobile-transaction-card {
+   background-color: var(--card-background);
+   border-radius: 10px;
+   padding: 15px;
+   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+ }
+ 
+ .transaction-header {
+   display: flex;
+   justify-content: space-between;
+   margin-bottom: 10px;
+ }
+ 
+ .transaction-date {
+   color: var(--primary-color);
+ }
+ 
+ .transaction-type {
+   font-weight: bold;
+   text-transform: uppercase;
+ }
+ 
+ .transaction-type.expense {
+   color: #e74c3c;
+ }
+ 
+ .transaction-type.income {
+   color: var(--secondary-color);
+ }
+ 
+ .transaction-body {
+   display: flex;
+   justify-content: space-between;
+ }
+ 
+ .transaction-description {
+   color: var(--text-color);
+ }
+ 
+ .transaction-amount {
+   font-weight: bold;
+ }
+ 
+ .transaction-amount.expense {
+   color: #e74c3c;
+ }
+ 
+ .transaction-amount.income {
+   color: var(--secondary-color);
+ }
+ 
+ /* Desktop Transaction Table */
+ .transaction-table {
+   width: 100%;
+   border-collapse: collapse;
+   background-color: var(--card-background);
+   border-radius: 10px;
+   overflow: hidden;
+ }
+ 
+ .transaction-table table {
+   width: 100%;
+ }
+ 
+ .transaction-table th,
+ .transaction-table td {
+   border: 1px solid #eee;
+   padding: 12px;
+   text-align: left;
+ }
+ 
+ .transaction-table th {
+   background-color: var(--primary-color);
+   color: white;
+ }
+ 
+ .transaction-table tr:nth-child(even) {
+   background-color: #f9f9f9;
+ }
+ 
+ /* Responsive Design */
+ @media screen and (max-width: 768px) {
+   .tracker-container {
+     padding: 15px;
+   }
+ 
+   .summary-grid,
+   .transaction-form {
+     grid-template-columns: 1fr;
+   }
+ 
+   h1 {
+     font-size: 2em;
+   }
+ 
+   .transaction-form input,
+   .transaction-form select,
+   .transaction-form button {
+     margin-bottom: 10px;
+   }
+ }
