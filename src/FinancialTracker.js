@@ -12,70 +12,72 @@ function FinancialTracker() {
   const [capital, setCapital] = useState(1000000);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // Responsive check
+  // Resize event listener to detect screen size changes
   useEffect(() => {
-   const q = query(collection(db, "transactions"));
- 
-   const unsubscribe = onSnapshot(q, snapshot => {
-     const fetchedTransactions = snapshot.docs.map(doc => ({
-       id: doc.id,
-       ...doc.data(),
-     }));
-     setTransactions(fetchedTransactions);
-   });
- 
-   // Cleanup listener on component unmount
-   return () => unsubscribe();
- }, []);
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
+  // Fetch transactions from Firestore and listen for updates
+  useEffect(() => {
+    const q = query(collection(db, "transactions"));
+    const unsubscribe = onSnapshot(q, snapshot => {
+      const fetchedTransactions = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          type: 'expense', // Default type if not provided
+          ...data
+        };
+      });
+      setTransactions(fetchedTransactions);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Handle adding a new transaction
   const addTransaction = async () => {
-   if (!description || !amount || !date) return;
- 
-   const amountValue = parseFloat(amount);
- 
-   const newTransaction = {
-     date,
-     description,
-     amount: amountValue,
-     type,
-   };
- 
-   try {
-     // Add transaction to Firestore
-     await addDoc(collection(db, "transactions"), newTransaction);
- 
-     // Clear input fields
-     setDescription("");
-     setAmount("");
-     setDate("");
-   } catch (error) {
-     console.error("Error adding transaction: ", error);
-   } 
+    if (!description || !amount || !date) return;
 
-    if (type === 'capital') {
-      setCapital(prevCapital => prevCapital + amountValue);
+    const amountValue = parseFloat(amount);
+
+    const newTransaction = {
+      date,
+      description,
+      amount: amountValue,
+      type,
+    };
+
+    try {
+      await addDoc(collection(db, "transactions"), newTransaction);
+
+      if (type === 'capital') {
+        setCapital(prevCapital => prevCapital + amountValue);
+      }
+
+      // Clear form inputs
+      setDescription('');
+      setAmount('');
+      setDate('');
+    } catch (error) {
+      console.error("Error adding transaction: ", error);
     }
-
-    setTransactions([...transactions, newTransaction]);
-
-    // Clear input fields
-    setDescription('');
-    setAmount('');
-    setDate('');
   };
 
+  // Calculate totals
   const calculateTotals = () => {
     const expenses = transactions
       .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     const income = transactions
       .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     const capitalTransactions = transactions
       .filter(t => t.type === 'capital')
-      .reduce((sum, t) => sum + t.amount, 0);
+      .reduce((sum, t) => sum + (t.amount || 0), 0);
 
     return {
       expenses,
@@ -88,10 +90,12 @@ function FinancialTracker() {
 
   const { expenses, income, capitalTransactions, profit, remainingBalance } = calculateTotals();
 
+  // Format currency
   const formatCurrency = amount => {
-    return `₦${amount.toLocaleString()}`;
+    return `₦${(amount || 0).toLocaleString()}`;
   };
 
+  // Render responsive summaries
   const renderMobileSummary = () => (
     <div className="mobile-summary-grid">
       <div className="mobile-summary-card">
@@ -142,20 +146,22 @@ function FinancialTracker() {
     </div>
   );
 
+  // Render responsive transaction lists
   const renderMobileTransactions = () => (
     <div className="mobile-transaction-list">
       {transactions.map(transaction => (
         <div key={transaction.id} className="mobile-transaction-card">
           <div className="transaction-header">
-            <span className="transaction-date">{transaction.date}</span>
-            <span className={`transaction-type ${transaction.type}`}>
-              {transaction.type === 'expense' ? 'Expense' : transaction.type === 'income' ? 'Income' : 'Capital'}
+            <span className="transaction-date">{transaction.date || 'N/A'}</span>
+            <span className={`transaction-type ${transaction.type || 'expense'}`}>
+              {(transaction.type || 'expense').charAt(0).toUpperCase() + 
+               (transaction.type || 'expense').slice(1)}
             </span>
           </div>
           <div className="transaction-body">
-            <p className="transaction-description">{transaction.description}</p>
+            <p className="transaction-description">{transaction.description || 'N/A'}</p>
             <p className="transaction-amount">
-              {transaction.type === 'expense' ? '-' : '+'}
+              {(transaction.type === 'expense' ? '-' : '+')}
               {formatCurrency(transaction.amount)}
             </p>
           </div>
@@ -178,11 +184,12 @@ function FinancialTracker() {
         <tbody>
           {transactions.map(transaction => (
             <tr key={transaction.id}>
-              <td>{transaction.date}</td>
+              <td>{transaction.date || 'N/A'}</td>
               <td>
-                {transaction.type === 'expense' ? 'Expense' : transaction.type === 'income' ? 'Income' : 'Capital'}
+                {(transaction.type || 'expense').charAt(0).toUpperCase() + 
+                 (transaction.type || 'expense').slice(1)}
               </td>
-              <td>{transaction.description}</td>
+              <td>{transaction.description || 'N/A'}</td>
               <td>{formatCurrency(transaction.amount)}</td>
             </tr>
           ))}
