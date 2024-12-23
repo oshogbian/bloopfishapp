@@ -9,8 +9,10 @@ function FinancialTracker() {
   const [amount, setAmount] = useState('');
   const [type, setType] = useState('expense');
   const [date, setDate] = useState('');
-  const [capital, setCapital] = useState(1000000);
+  const [capital, setCapital] = useState(0); // Initialize to 0 since we'll calculate total later
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  const BASE_CAPITAL = 1000000; // Define base capital as a constant
 
   // Resize event listener to detect screen size changes
   useEffect(() => {
@@ -27,41 +29,56 @@ function FinancialTracker() {
         const data = doc.data();
         return {
           id: doc.id,
-          type: 'expense', // Default type if not provided
+          type: data.type || 'expense', // Default type if not provided
           ...data
         };
       });
       setTransactions(fetchedTransactions);
+      
+      // Calculate total capital including all capital transactions
+      const totalCapitalTransactions = fetchedTransactions
+        .filter(t => t.type === 'capital')
+        .reduce((sum, t) => sum + (t.amount || 0), 0);
+      
+      // Update capital with base amount plus all capital transactions
+      setCapital(BASE_CAPITAL + totalCapitalTransactions);
     });
     return () => unsubscribe();
   }, []);
 
   // Handle adding a new transaction
   const addTransaction = async () => {
-    if (!description || !amount || !date) return;
+    if (!description || !amount || !date) {
+      alert('Please fill in all fields');
+      return;
+    }
 
     const amountValue = parseFloat(amount);
+
+    if (isNaN(amountValue) || amountValue <= 0) {
+      alert('Please enter a valid amount');
+      return;
+    }
 
     const newTransaction = {
       date,
       description,
       amount: amountValue,
       type,
+      timestamp: new Date().toISOString()
     };
 
     try {
       await addDoc(collection(db, "transactions"), newTransaction);
-
-      if (type === 'capital') {
-        setCapital(prevCapital => prevCapital + amountValue);
-      }
-
+      
       // Clear form inputs
       setDescription('');
       setAmount('');
       setDate('');
+      setType('expense'); // Reset to default type
     } catch (error) {
       console.error("Error adding transaction: ", error);
+      alert('Error adding transaction. Please try again.');
     }
   };
 
@@ -149,24 +166,25 @@ function FinancialTracker() {
   // Render responsive transaction lists
   const renderMobileTransactions = () => (
     <div className="mobile-transaction-list">
-      {transactions.map(transaction => (
-        <div key={transaction.id} className="mobile-transaction-card">
-          <div className="transaction-header">
-            <span className="transaction-date">{transaction.date || 'N/A'}</span>
-            <span className={`transaction-type ${transaction.type || 'expense'}`}>
-              {(transaction.type || 'expense').charAt(0).toUpperCase() + 
-               (transaction.type || 'expense').slice(1)}
-            </span>
+      {transactions
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+        .map(transaction => (
+          <div key={transaction.id} className="mobile-transaction-card">
+            <div className="transaction-header">
+              <span className="transaction-date">{transaction.date || 'N/A'}</span>
+              <span className={`transaction-type ${transaction.type}`}>
+                {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
+              </span>
+            </div>
+            <div className="transaction-body">
+              <p className="transaction-description">{transaction.description || 'N/A'}</p>
+              <p className="transaction-amount">
+                {(transaction.type === 'expense' ? '-' : '+')}
+                {formatCurrency(transaction.amount)}
+              </p>
+            </div>
           </div>
-          <div className="transaction-body">
-            <p className="transaction-description">{transaction.description || 'N/A'}</p>
-            <p className="transaction-amount">
-              {(transaction.type === 'expense' ? '-' : '+')}
-              {formatCurrency(transaction.amount)}
-            </p>
-          </div>
-        </div>
-      ))}
+        ))}
     </div>
   );
 
@@ -182,17 +200,21 @@ function FinancialTracker() {
           </tr>
         </thead>
         <tbody>
-          {transactions.map(transaction => (
-            <tr key={transaction.id}>
-              <td>{transaction.date || 'N/A'}</td>
-              <td>
-                {(transaction.type || 'expense').charAt(0).toUpperCase() + 
-                 (transaction.type || 'expense').slice(1)}
-              </td>
-              <td>{transaction.description || 'N/A'}</td>
-              <td>{formatCurrency(transaction.amount)}</td>
-            </tr>
-          ))}
+          {transactions
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .map(transaction => (
+              <tr key={transaction.id} className={`transaction-row ${transaction.type}`}>
+                <td>{transaction.date || 'N/A'}</td>
+                <td>
+                  {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
+                </td>
+                <td>{transaction.description || 'N/A'}</td>
+                <td className="amount-cell">
+                  {(transaction.type === 'expense' ? '-' : '')}
+                  {formatCurrency(transaction.amount)}
+                </td>
+              </tr>
+            ))}
         </tbody>
       </table>
     </div>
@@ -213,7 +235,11 @@ function FinancialTracker() {
             required
             placeholder="Date"
           />
-          <select value={type} onChange={e => setType(e.target.value)}>
+          <select 
+            value={type} 
+            onChange={e => setType(e.target.value)}
+            className={`transaction-type-select ${type}`}
+          >
             <option value="expense">Expense</option>
             <option value="income">Income</option>
             <option value="capital">Capital</option>
@@ -231,6 +257,8 @@ function FinancialTracker() {
             value={amount}
             onChange={e => setAmount(e.target.value)}
             required
+            min="0"
+            step="0.01"
           />
           <button onClick={addTransaction}>Add Transaction</button>
         </div>
