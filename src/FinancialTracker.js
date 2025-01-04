@@ -109,7 +109,7 @@ function FinancialTracker() {
             </div>
             <div className="transaction-body">
               <p className="transaction-description">{transaction.description || 'N/A'}</p>
-              <p className="transaction-amount">
+              <p className={`transaction-amount ${transaction.type}`}>
                 {(transaction.type === 'expense' ? '-' : '+')}
                 {formatCurrency(transaction.amount)}
               </p>
@@ -141,7 +141,7 @@ function FinancialTracker() {
                   {transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1)}
                 </td>
                 <td>{transaction.description || 'N/A'}</td>
-                <td className="amount-cell">
+                <td className={`amount-cell ${transaction.type}`}>
                   {(transaction.type === 'expense' ? '-' : '')}
                   {formatCurrency(transaction.amount)}
                 </td>
@@ -188,7 +188,10 @@ function FinancialTracker() {
 
   // Effect for window resize
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -218,10 +221,27 @@ function FinancialTracker() {
 
   return (
     <div className="financial-tracker">
+    <header className="header">
+      <div className="header-content">
+        <img 
+          src="/pictures/unnamed.png" 
+          alt="Bloop Fish Farm Logo" 
+          className="header-logo"
+        />
+        <nav className="header-nav">
+          <a href="#summary">Summary</a>
+          <a href="#transactions">Transactions</a>
+          <a href="#contact">Contact</a>
+        </nav>
+      </div>
+    </header>
+
       <div className="tracker-container">
         <h1>Bloop Fish Farm Financial Tracker</h1>
-
-        {isMobile ? renderMobileSummary() : renderDesktopSummary()}
+        
+        <section id="summary">
+          {isMobile ? renderMobileSummary() : renderDesktopSummary()}
+        </section>
 
         <div className="transaction-form">
           <input
@@ -259,10 +279,12 @@ function FinancialTracker() {
           <button onClick={handleAddTransaction}>Add Transaction</button>
         </div>
 
-        {isMobile ? renderMobileTransactions() : renderDesktopTransactions()}
+        <section id="transactions">
+          {isMobile ? renderMobileTransactions() : renderDesktopTransactions()}
+        </section>
       </div>
       
-      <footer className="app-footer">
+      <footer id="contact" className="app-footer">
         <div className="footer-content">
           <div className="footer-section">
             <h3>Contact</h3>

@@ -19,6 +19,84 @@
   100% { background-position: 100% 50%; }
 }
 
+/* Add the animation keyframes */
+@keyframes slideLogo {
+  0% {
+    transform: translateX(-20px);
+  }
+  50% {
+    transform: translateX(20px);
+  }
+  100% {
+    transform: translateX(-20px);
+  }
+}
+
+/* Update header and logo styles */
+.header {
+  background-color: var(--card-background);
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+  border-radius: 8px;
+  overflow: hidden; /* Ensure the logo doesn't overflow during animation */
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-logo {
+  height: 40px;
+  width: auto;
+  animation: slideLogo 3s ease-in-out infinite;
+}
+
+.header-logo:hover {
+  animation-play-state: paused; /* Pause animation on hover */
+}
+
+.header-nav {
+  display: flex;
+  gap: 2rem;
+}
+
+.header-nav a {
+  color: var(--text-color);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.header-nav a:hover {
+  background-color: var(--background-color);
+  color: var(--primary-color);
+}
+
+/* Keep the responsive styles */
+@media screen and (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .header-logo {
+    height: 35px;
+    margin-bottom: 0.5rem;
+  }
+  
+  .header-nav {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+  }
+}
 .financial-tracker {
   font-family: 'Arial', sans-serif;
   background-color: var(--background-color);
@@ -313,6 +391,18 @@ h1 {
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .header-nav {
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+  }
+
   .tracker-container {
     padding: 15px;
   }
